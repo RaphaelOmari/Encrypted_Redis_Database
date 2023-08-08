@@ -16,9 +16,9 @@ def cal():
     
     y = input("Please enter the number of years: ")
     
-    while True:
+    while True: #Double checks that the value "x" is a number rather than an integer
         if x.isdigit() == True:
-            break
+            break #Breaks out of loop if all is good
         
         else:
             print("Please input an integer for the amount of money...")
