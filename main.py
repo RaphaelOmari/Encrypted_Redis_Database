@@ -1,11 +1,11 @@
 import random
 import math
-
+#import getpass
 password = None
 Name = input("Please input username: ") #1
-accesscode = input("Please Set Access Code: ") #2
+accesscode = input("Please Set Access Code: ") #Possibility of using [*] accesscode = getpass.getpass()
 TruFal = accesscode.isdigit()
-counter = 1
+counter = 0
 
 
 ###############################################################
