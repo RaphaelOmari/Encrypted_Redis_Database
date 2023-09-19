@@ -1,12 +1,17 @@
 import random
 import math
+import bcrypt
 #import getpass
 password = None
+
 Name = input("Please input username: ") #1
 accesscode = input("Please Set Access Code: ") #Possibility of using [*] accesscode = getpass.getpass()
+bytes = accesscode.encode("utf-8")
+salt = bcrypt.gensalt()
+
+hash = bcrypt.hashpw(bytes, salt)
 TruFal = accesscode.isdigit()
 counter = 0
-
 
 ###############################################################
 def cal():
