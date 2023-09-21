@@ -1,3 +1,5 @@
+import redisdb
+
 class User():
     def __init__(self, first_name, last_name, username, password, accessword, status=True):
         self.first_name = first_name
@@ -35,6 +37,9 @@ def add_user():
         add_user()
     else:
         print("Username successfully added")
+
+    return username
+
 
 def login():
     username_entry = ""
