@@ -1,13 +1,10 @@
 import redisdb
 
 class User():
-    def __init__(self, first_name, last_name, username, password, accessword, status=True):
-        self.first_name = first_name
-        self.last_name = last_name
+    def __init__(self, username, password, status=True):
+        
         self.username = username  # Added username attribute
         self.password = password
-        self.accessword = accessword
-        self.name = first_name.title() + " " + last_name.title()
         self.status = status
 
 users = []
@@ -15,6 +12,7 @@ users = []
 def add_user():
     new_username = input("Choose a Username: ")
     while new_username in [user.username for user in users]:
+
         new_username = input("Username already in use; choose a different username: ")
     password = ""
     accessword = ""
@@ -27,8 +25,12 @@ def add_user():
     first_name = input("First name? ")
     last_name = input("Last name? ")
 
-    username = User(first_name, last_name, new_username, password, accessword)
-    print("Welcome " + username.name)
+    username = User(new_username, password) #Seen as (username, password)
+
+    full_name = first_name + last_name
+    #print("Welcome " + username.name) username.name is how you reference the variable 
+    User_info = {"Full Name" : full_name, "Password": password, "Username" : new_username}
+    print("This is my try", User_info.values())
     users.append(username)
     print(users)
 
@@ -67,5 +69,18 @@ def login():
     #if more != "n" and more != "no":
     #    login()
 
-add_user()
-login()
+def switcher():
+    mychoice = {"a": add_user, "b" : login}
+    keylist = list(mychoice.keys())
+    choice = input("If you are a new user please press 'a', if you are an existing user please press 'b'").lower()
+
+    while mychoice not in  keylist:
+        choice = input("If you are a new user please press 'a', if you are an existing user please press 'b'").lower()
+
+    final_choice = mychoice[choice]()
+
+    final_choice
+    return None
+
+#add_user()
+#login()
