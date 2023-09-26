@@ -1,15 +1,8 @@
-from user_login import *
 from getpass import getpass
+from user_login import switcher, add_user, User
 
 username = input("Please input your username: ")
 password = getpass("Please input your password")
 
-mylogin = user_login.User(username, password)
-
-mylogin.switcher()
-
-
-
-
-
-
+if __name__ == "__main__":
+    switcher()
