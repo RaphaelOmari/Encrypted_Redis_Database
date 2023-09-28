@@ -8,75 +8,66 @@ class User:
         self.password = password
         self.status = status
 
-    def __str__(self) -> str:
-        #return f"User(username={self.username}, password={self.password})"
-        pass
-    
+    def __str__(self):
+        return f"User(username={self.username})"
+
     def to_dict(self):
-        return {"username" : self.username, "password" : self.password}
+        return {"username": self.username, "password": self.password}
 
 users = []
-
-def get_random_string(length): #Generate a random string of any length
-    # choose from all lowercase letter
-    letters = string.ascii_lowercase
-    result_str = ''.join(random.choice(letters) for i in range(length))
-    return result_str
 
 def add_user():
     new_username = input("Choose a Username: ")
     while new_username in [user.username for user in users]:
         new_username = input("Username already in use; choose a different username: ")
-    
-    password = input("Choose a 4 character password: ")
-    salt = get_random_string(5)
 
-    db_password = password+salt
-    hashed = hashlib.md5(db_password.encode())
-    
+    password = input("Choose a 4 character password: ")
     while len(password) != 4:
         print("Password must be exactly 4 characters long.")
         password = input("Choose a 4 character password: ")
 
-    #accessword = input("Please provide a secondary password with any characters: ")
-    
+    salt = 'Hex10'
+    db_password = password + salt
+    hashed = hashlib.md5(db_password.encode())
+
     first_name = input("First name? ")
     last_name = input("Last name? ")
-    username = User(new_username, password) #username(username, password)
-    user_dict = username.to_dict()
+    The_username = User(new_username, hashed.hexdigest())  # Store the hashed password
+    user_dict = The_username.to_dict()
+    user_dict["status"] = True  # Add the 'status' field
     full_name = first_name + " " + last_name
-    #User_info = {"Full Name": full_name, "Password": password, "Username": new_username}
     users.append(user_dict)
-    print("User successfully added", username.username)
-    
-    print("[*]")
-    print(users)
-    print("[*]")
+    print("User successfully added", The_username.username)
 
 def login():
     username_entry = input("Please provide username: ")
-    found_user = next((user for user in users if user.username == username_entry), None)
-    
+    found_user = next((user for user in users if user["username"] == username_entry), None)
+    salt = 'Hex10'
+
     if found_user is None:
         print("User not found.")
         return
-    
-    if not found_user.status:
+
+    if not found_user["status"]:
         print("Account locked.")
         return
 
     password_count = 0
+
     while password_count < 4:
         password_entry = input("Password? ")
-        if password_entry == found_user.password:
-            print("Login details accepted. Welcome, " + found_user.username)
+        db_password = password_entry + salt
+        hashedpw = hashlib.md5(db_password.encode())
+
+        if hashedpw.hexdigest() == found_user["password"]:
+            print("Login details accepted. Welcome, " + found_user["username"])
             break
         else:
             password_count += 1
 
     if password_count >= 4:
         print("Login attempts exceeded. Contact customer support for assistance.")
-        found_user.status = False
+        found_user["status"] = False
 
 def switcher():
     while True:
@@ -88,10 +79,6 @@ def switcher():
             login()
         else:
             print("Invalid choice. Please select 'a' or 'b'.")
-
-def tester():
-    print("This is a test")
-    print(users)
 
 if __name__ == "__main__":
     switcher()
