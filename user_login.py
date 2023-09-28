@@ -1,4 +1,6 @@
 import hashlib
+import random
+import string
 
 class User:
     def __init__(self, username, password, status=True):
@@ -6,7 +8,20 @@ class User:
         self.password = password
         self.status = status
 
+    def __str__(self) -> str:
+        #return f"User(username={self.username}, password={self.password})"
+        pass
+    
+    def to_dict(self):
+        return {"username" : self.username, "password" : self.password}
+
 users = []
+
+def get_random_string(length): #Generate a random string of any length
+    # choose from all lowercase letter
+    letters = string.ascii_lowercase
+    result_str = ''.join(random.choice(letters) for i in range(length))
+    return result_str
 
 def add_user():
     new_username = input("Choose a Username: ")
@@ -14,20 +29,29 @@ def add_user():
         new_username = input("Username already in use; choose a different username: ")
     
     password = input("Choose a 4 character password: ")
+    salt = get_random_string(5)
+
+    db_password = password+salt
+    hashed = hashlib.md5(db_password.encode())
+    
     while len(password) != 4:
         print("Password must be exactly 4 characters long.")
         password = input("Choose a 4 character password: ")
 
-    accessword = input("Please provide a secondary password with any characters: ")
+    #accessword = input("Please provide a secondary password with any characters: ")
     
     first_name = input("First name? ")
     last_name = input("Last name? ")
-    
-    username = User(new_username, password)
+    username = User(new_username, password) #username(username, password)
+    user_dict = username.to_dict()
     full_name = first_name + " " + last_name
-    User_info = {"Full Name": full_name, "Password": password, "Username": new_username}
-    users.append(username)
-    print("User successfully added.")
+    #User_info = {"Full Name": full_name, "Password": password, "Username": new_username}
+    users.append(user_dict)
+    print("User successfully added", username.username)
+    
+    print("[*]")
+    print(users)
+    print("[*]")
 
 def login():
     username_entry = input("Please provide username: ")
@@ -64,6 +88,10 @@ def switcher():
             login()
         else:
             print("Invalid choice. Please select 'a' or 'b'.")
+
+def tester():
+    print("This is a test")
+    print(users)
 
 if __name__ == "__main__":
     switcher()
