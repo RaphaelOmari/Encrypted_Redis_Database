@@ -1,6 +1,8 @@
-import hashlib
-import random
-import string
+import bcrypt
+import re
+import smtplib
+
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 
 class User:
     def __init__(self, username, password, status=True):
@@ -12,37 +14,54 @@ class User:
         return f"User(username={self.username})"
 
     def to_dict(self):
-        return {"username": self.username, "password": self.password}
+        return {"username": self.username, "password": self.password, "status": self.status}
+
+def hash_password(password):
+    salt = bcrypt.gensalt()
+    hashedpassword = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashedpassword, salt
+
+def check(email):
+    if(re.fullmatch(regex, email)):
+        return True
+    else:
+        return False
 
 users = []
+users_info = {}
 
 def add_user():
+
+    acc_email = input("Please enter your email: ")
+    thechecker = check(acc_email)
+
+    while thechecker is not True:
+        acc_email = input("Please enter a valid email address: ")
+
     new_username = input("Choose a Username: ")
     while new_username in [user.username for user in users]:
         new_username = input("Username already in use; choose a different username: ")
 
-    password = input("Choose a 4 character password: ")
-    while len(password) != 4:
-        print("Password must be exactly 4 characters long.")
-        password = input("Choose a 4 character password: ")
+    password = input("Choose an 8 character minimum password: ")
+    while len(password) < 8:
+        print("Password must be at least 8 characters long.")
+        password = input("Choose an 8 character minimum password: ")
 
-    salt = 'Hex10'
-    db_password = password + salt
-    hashed = hashlib.md5(db_password.encode())
+    hashed_password, salt = hash_password(password)
 
     first_name = input("First name? ")
     last_name = input("Last name? ")
-    The_username = User(new_username, hashed.hexdigest())  # Store the hashed password
-    user_dict = The_username.to_dict()
-    user_dict["status"] = True  # Add the 'status' field
-    full_name = first_name + " " + last_name
-    users.append(user_dict)
-    print("User successfully added", The_username.username)
+    The_username = User(new_username, hashed_password)
+    users_info[new_username] = {"Passcode": hashed_password, "First Name": first_name, "User Email" : acc_email, "status": True}
+    users.append(The_username.to_dict())
+    print("User successfully added", new_username)
 
 def login():
     username_entry = input("Please provide username: ")
-    found_user = next((user for user in users if user["username"] == username_entry), None)
-    salt = 'Hex10'
+    
+    found_user = users_info.get(username_entry) #get() retrieves the value of the key you are asking
+
+    print(found_user)
 
     if found_user is None:
         print("User not found.")
@@ -56,11 +75,9 @@ def login():
 
     while password_count < 4:
         password_entry = input("Password? ")
-        db_password = password_entry + salt
-        hashedpw = hashlib.md5(db_password.encode())
 
-        if hashedpw.hexdigest() == found_user["password"]:
-            print("Login details accepted. Welcome, " + found_user["username"])
+        if bcrypt.checkpw(password_entry.encode('utf-8'), found_user["Passcode"]):
+            print("Login details accepted. Welcome, " + found_user["First Name"])
             break
         else:
             password_count += 1
@@ -69,16 +86,51 @@ def login():
         print("Login attempts exceeded. Contact customer support for assistance.")
         found_user["status"] = False
 
+def notify_administrator(subject, message):
+    # Replace with your email configuration
+   
+    sender_email = input("Please enter your email address: ")
+    sender_password = input("Please enter your password address: ")
+    admin_email = "rafaelebele@yahoo.com"
+
+    thechecker = check(sender_email)
+
+    while thechecker is not True:
+        sender_email = input("Please enter a valid email address: ")
+
+    # Create an SMTP client to send email notifications
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+
+            # Compose the email
+            email_body = f"Subject: {subject}\n\n{message}"
+
+            # Send the email
+            server.sendmail(sender_email, admin_email, email_body)
+
+        print("Administrator notified.")
+    except Exception as e:
+        print("Failed to notify administrator: ", str(e))
+
 def switcher():
     while True:
-        choice = input("If you are a new user, press 'a'; if you are an existing user, press 'b': ").lower()
+        choice = input("If you are a new user, press 'a'; if you are an existing user, press 'b'; to exit, press 'q': ").lower()
 
         if choice == 'a':
             add_user()
         elif choice == 'b':
             login()
+        elif choice == 'q':
+            print("Goodbye!")
+            break
         else:
-            print("Invalid choice. Please select 'a' or 'b'.")
+            print("Invalid choice. Please select 'a', 'b', or 'q'.")
 
 if __name__ == "__main__":
     switcher()
+
+
+
+    #Email to reset password and have a password checker
