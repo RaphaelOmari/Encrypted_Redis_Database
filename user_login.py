@@ -56,7 +56,7 @@ def add_user() -> None:
     users.append(The_username.to_dict())
     print("User successfully added", new_username)
 
-    return None
+    return users_info[new_username]
 
 def login():
     username_entry = input("Please provide username: ")
