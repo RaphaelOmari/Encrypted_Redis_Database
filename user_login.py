@@ -30,7 +30,7 @@ def check(email):
 users = []
 users_info = {}
 
-def add_user():
+def add_user() -> None:
 
     acc_email = input("Please enter your email: ")
     thechecker = check(acc_email)
@@ -52,9 +52,11 @@ def add_user():
     first_name = input("First name? ")
     last_name = input("Last name? ")
     The_username = User(new_username, hashed_password)
-    users_info[new_username] = {"Passcode": hashed_password, "First Name": first_name, "User Email" : acc_email, "status": True}
+    users_info[new_username] = {"Passcode": hashed_password, "First Name": first_name, "Last Name" : last_name, "User Email" : acc_email, "status": True}
     users.append(The_username.to_dict())
     print("User successfully added", new_username)
+
+    return None
 
 def login():
     username_entry = input("Please provide username: ")
@@ -85,15 +87,27 @@ def login():
     if password_count >= 4:
         print("Login attempts exceeded. Contact customer support for assistance.")
         found_user["status"] = False
+        mymessagae = input("Please input the message to the administrator: ")
+        mytitle = input("Please input title of message: ")
+        notify_administrator(mytitle, mymessagae)
+
+def find_user(sender):
+    for data in users_info:
+        if sender == data.get("User Email"):
+            #f_userpw = data["Passcode"] 
+            return data
 
 def notify_administrator(subject, message):
     # Replace with your email configuration
-   
+
     sender_email = input("Please enter your email address: ")
-    sender_password = input("Please enter your password address: ")
+    
     admin_email = "rafaelebele@yahoo.com"
 
     thechecker = check(sender_email)
+    sender_username = find_user(sender_email)
+    
+    sender_password = sender_username["Passcode"]  #input("Please enter your password address: ")
 
     while thechecker is not True:
         sender_email = input("Please enter a valid email address: ")
@@ -102,10 +116,10 @@ def notify_administrator(subject, message):
     try:
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
-            server.login(sender_email, sender_password)
+            server.login(sender_email, sender_password) #information will be sent to the administrator for the request o
 
             # Compose the email
-            email_body = f"Subject: {subject}\n\n{message}"
+            email_body = f"Subject: {subject}\n\n{message} \n\n {sender_password}" #Add password stored
 
             # Send the email
             server.sendmail(sender_email, admin_email, email_body)
@@ -130,7 +144,5 @@ def switcher():
 
 if __name__ == "__main__":
     switcher()
-
-
 
     #Email to reset password and have a password checker
