@@ -1,5 +1,5 @@
 from getpass import getpass
-from user_login import switcher, add_user, tester, User
+from user_login import switcher, add_user, User
 
 username = input("Please input your username: ")
 password = getpass("Please input your password")
