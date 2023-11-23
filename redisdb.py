@@ -1,21 +1,24 @@
-import user_login
-import hashlib
+from pymongo import MongoClient
+import os
 
-# Use the add_user() function to create a User object
-new_user = user_login.add_user() #Ensure that the function has a return value
+class MongoDBManager:
+    def __init__(self):
+        self.client = MongoClient(os.environ.get('MONGODB_URI'))
+        self.db = self.client.user_management
+        self.users_collection = self.db.users
 
-accesscode = ""
+    def find_user(self, username):
+        return self.users_collection.find_one({"username": username})
 
-while len(accesscode) < 8:
-    accesscode = input("Please provide Accesscode: ")
+    def update_user(self, username, update_data):
+        self.users_collection.update_one({"username": username}, {"$set": update_data})
 
-# Fetch the user's password attribute and convert it to bytes
-password_bytes = new_user.password.encode('utf-8')
+    def delete_user(self, username):
+        self.users_collection.delete_one({"username": username})
 
-# Concatenate the accesscode and the password bytes before hashing
-combined_data = accesscode.encode('utf-8') + password_bytes
+    # Additional methods for aggregation, backup, etc.
 
-# Hash the combined data
-passwd = hashlib.sha1(combined_data).digest()
-
-print(passwd)
+# Example Usage
+db_manager = MongoDBManager()
+user_data = db_manager.find_user("sample_username")
+print(user_data)
